@@ -7,12 +7,13 @@ class UniversityModelTest(TestCase):
         """Test que l'université peut être créée"""
         university = University.objects.create(
             name="Harvard University",
-            location="Cambridge"
+            city="Cambridge"  # Utilisez 'city' au lieu de 'location'
         )
         self.assertEqual(str(university), "Harvard University")
+        self.assertEqual(university.city, "Cambridge")
 
 class UniversityViewTest(TestCase):
     def test_university_list_view(self):
         """Test de la vue liste des universités"""
-        response = self.client.get(reverse('university-list'))
+        response = self.client.get('/university/getAll/')
         self.assertEqual(response.status_code, 200)
