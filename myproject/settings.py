@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import sys
+import os
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -37,9 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'rest_framework',   # si placé avant
+    'rest_framework',
     'students',
-    'university',       # <-- ajouter ceci
+    'university',
 ]
 
 
@@ -74,22 +76,38 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 
 
 # ===============================
-# DATABASE CONFIGURATION (PostgreSQL)
+# DATABASE CONFIGURATION
 # ===============================
-# Change the values below according to your PostgreSQL setup
-# Make sure you already created a database named "django"
-# and a user "postgres" with password "root" (or the one you chose)
 
+# Use SQLite by default (for CI/CD and development)
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'django',       # le nom de ta base PostgreSQL
-        'USER': 'postgres',     # ton utilisateur PostgreSQL
-        'PASSWORD': 'root',     # ton mot de passe PostgreSQL (celui de pgAdmin)
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# Use PostgreSQL only if environment variable is set (for production)
+if os.getenv('USE_POSTGRESQL'):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'django',
+            'USER': 'postgres',
+            'PASSWORD': 'root',
+            'HOST': '127.0.0.1',
+            'PORT': '5432',
+        }
+    }
+
+# Always use SQLite for tests (UNE SEULE CONFIGURATION DE TEST)
+if 'test' in sys.argv:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',
+        }
+    }
 
 
 # ===============================
@@ -133,11 +151,14 @@ STATIC_URL = 'static/'
 # DEFAULT PRIMARY KEY FIELD TYPE
 # ===============================
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-# Database configuration for tests
-if 'test' in sys.argv:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': ':memory:',
-        }
-    }
+
+# SUPPRIMEZ LA CONFIGURATION DE TEST DUPLIQUÉE EN BAS !
+# NE LAISSEZ PAS CE CODE EN DOUBLE :
+#
+# if 'test' in sys.argv:
+#     DATABASES = {
+#         'default': {
+#             'ENGINE': 'django.db.backends.sqlite3',
+#             'NAME': ':memory:',
+#         }
+#     }
